@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const https = require("https");
+const xml2js = require("xml2js");
 
 class CountdownLatch
 {
@@ -25,8 +26,8 @@ class CountdownLatch
 
 function sendResponse(res, responseJson)
 {
-    console.log(responseJson);
-    res.json({title: "planes retrieved successfully!"});
+    //console.log(responseJson);
+    res.json(responseJson);
 }
 
 function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
@@ -52,7 +53,32 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
             response.on("end", function() 
                 {
                     console.log("responseXml: " + responseXml.substr(0, 255));
-                    responseJson.planes.push(`Received data for ${planeMakeModel}`);
+                    let json = xml2js.parseString(responseXml, (err, result) => 
+                        {
+                            if (err)
+                            {
+                                console.log(err);
+                                responseJson.errs.push(err);
+                            }
+                            else
+                            {
+                                responseJson.msgs.push(`Received data for ${planeMakeModel}`);
+                                if (result)
+                                {
+                                    if (result.AircraftItems)
+                                    {
+                                        let planes = result.AircraftItems.Aircraft;
+
+                                        if (planes)
+                                        {
+                                            responseJson.planes.push(...planes);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    );
+
                     cdl.Signal();
                 }
             );
@@ -72,7 +98,11 @@ router.get("/", function(req, res, next)
         //let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana"];
         let planesMakeModel = ["Cessna Citation II", "Columbia 400"];
         
-        let responseJson = { planes: [] };
+        let responseJson = { 
+            errs: [],
+            msgs: [],
+            planes: []
+        };
 
         const cdl = new CountdownLatch(planesMakeModel.length, sendResponse, res, responseJson);
 
