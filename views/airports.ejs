@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <div>
+        <table>
+            <tr>
+                <th>Origin</th>
+                <th>Destination</th>
+                <th>Distance</th>
+            </tr>
+            <tr>
+                <td><%= origin %></td>
+                <td><%= destination %></td>
+                <td><%= distance %></td>
+            </tr>
+            <tr>
+                <td><%= originLat %></td>
+                <td><%= originLong %></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><%= destinationLat %></td>
+                <td><%= destinationLong %></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+    <h2>Found <%= airportsInRange.length %> Airports in a <%= maxDistance %> NM Range around <%= origin %></h2>
+    <div>
+        <% for (airport of airportsInRange) { %> 
+            <p><%= airport.icao %></p>
+        <% } %>
+    </div>
+  </body>
+</html>
