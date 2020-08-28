@@ -23,39 +23,10 @@
         if (doneSpan) doneSpan.hidden = false;
     }
 
-    function populateTable(planesData)
+    function populateTable(planesHtml)
     {
         if(!resultTable) return;
-        
-        // clear table
-        // TODO
-
-        for (plane of planesData)
-        {
-            let trPlane = document.createElement("tr");
-            
-            let tdMakeModel = document.createElement("td");
-            tdMakeModel.textContent = plane.MakeModel;
-            trPlane.append(tdMakeModel);
-
-            let tdRegistration = document.createElement("td");
-            tdRegistration.textContent = plane.Registration;
-            trPlane.append(tdRegistration);
-
-            let tdLocation = document.createElement("td");
-            tdLocation.textContent = plane.Location;
-            trPlane.append(tdLocation);
-
-            let tdEquipment = document.createElement("td");
-            tdEquipment.textContent = plane.Equipment;
-            trPlane.append(tdEquipment);
-
-            let tdTimeLast100hr = document.createElement("td");
-            tdTimeLast100hr.textContent = plane.TimeLast100hr;
-            trPlane.append(tdTimeLast100hr);
-
-            resultTable.append(trPlane);
-        }
+        resultTable.innerHTML = planesHtml;
     }
 
 
@@ -74,10 +45,10 @@
                     {
                         console.log(this);
 
-                        responseJson = JSON.parse(this.response);
-                        console.log(responseJson);
+                        responseHtml = this.response;
+                        console.log(responseHtml);
 
-                        populateTable(responseJson.planes);
+                        populateTable(responseHtml);
 
                         uiUpdateOnRequestFinished();
                     }

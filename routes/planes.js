@@ -26,8 +26,18 @@ class CountdownLatch
 
 function sendResponse(res, responseJson)
 {
-    //console.log(responseJson);
-    res.json(responseJson);
+    res.render('planes', { minTimeLast100hr: 95, planes: responseJson.planes });
+}
+
+function filter(planes, icaos) 
+{
+    console.log("planes.length: " + planes.length);
+    console.log("icaos.length: " + icaos.length);
+    if (!icaos) return [];
+
+    let filteredPlanes = planes.filter((p) => icaos.includes(p.Location[0]));
+    console.log("filteredPlanes.length: " + filteredPlanes.length);
+    return filteredPlanes;
 }
 
 function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
@@ -67,7 +77,7 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
                                 {
                                     if (result.AircraftItems)
                                     {
-                                        let planes = result.AircraftItems.Aircraft;
+                                        let planes = filter(result.AircraftItems.Aircraft, icaos);
 
                                         if (planes)
                                         {
@@ -92,7 +102,7 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
 router.get("/", function(req, res, next)
     {
         const url = "server.fseconomy.net";
-        let icaos = ["EDDM", "EDDK"];
+        let icaos = ["EDDM", "EDDK", "KSAS", "EDDW"];
         //let planesMakeModel = ["Cessna 172 Skyhawk"];
         //let planesMakeModel = ["Diamond DA20 Katana"];
         //let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana"];
