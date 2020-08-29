@@ -49,14 +49,21 @@ class AirportData
         return distance;
     }
 
-    airportsInRange(originIcao, maxDistance)
+    airportsInRange(originIcao, maxDistance, candidateIcaos = undefined)
     {
         let origin = this.getAirport(originIcao);
         if (!origin) return [];
 
+        let airportsToCheck = ICAOS;
+
+        if (candidateIcaos && candidateIcaos.length != 0)
+        {
+            airportsToCheck = ICAOS.filter((airport) => candidateIcaos.includes(airport.icao));
+        }
+
         console.log("Enter airportsInRange(originIcao, maxDistance)...");
         let begin = new Date().getTime();
-        let inRange = ICAOS.filter((airport) => this.calcDistanceLatLongIcao(origin, airport.icao) <= maxDistance && origin.icao != airport.icao);
+        let inRange = airportsToCheck.filter((airport) => this.calcDistanceLatLongIcao(origin, airport.icao) <= maxDistance && origin.icao != airport.icao);
         console.log("Finished airportsInRange(originIcao, maxDistance)! Duration: " + (new Date().getTime() - begin) + "ms");
         
         return inRange;

@@ -17,7 +17,10 @@ router.get('/', function(req, res, next)
     let distance = airportdata.calcDistanceLatLong(origin, destination);
 
     let maxDistance = 125;
-    let airportsInRange = airportdata.airportsInRange(originIcao, maxDistance);
+
+    //let candidates = undefined;
+    let candidates = ["EBHN", "EBGB", "EDDM"];
+    let airportsInRange = airportdata.airportsInRange(originIcao, maxDistance, candidates);
 
     res.render('airports', 
         {
@@ -31,7 +34,8 @@ router.get('/', function(req, res, next)
             distance: distance,
 
             maxDistance: maxDistance,
-            airportsInRange: airportsInRange
+            candidates: candidates,
+            airportsInRange: airportsInRange,
         }
     );
 });

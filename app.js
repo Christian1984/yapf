@@ -52,7 +52,18 @@ app.listen(port, () => {
 });
 
 /*
-const icaos2 = ICAOS.map(el => ({icao: el.icao,lat: el.lat,lon: el.lon,latRad: el.lat * (Math.PI / 180),lonRad: el.lon * (Math.PI / 180),latSin: Math.sin(el.lat * (Math.PI / 180)),lonSin: Math.sin(el.lon * (Math.PI / 180)),latCos: Math.cos(el.lat * (Math.PI / 180)),lonCos: Math.cos(el.lon * (Math.PI / 180))}));
+const icaos2 = ICAOS.map(el => ({
+    icao: el.icao,
+    lat: el.lat,
+    lon: el.lon,
+    //latRad: el.lat * (Math.PI / 180),
+    lonRad: el.lon * (Math.PI / 180),
+    latSin: Math.sin(el.lat * (Math.PI / 180)),
+    //lonSin: Math.sin(el.lon * (Math.PI / 180)),
+    latCos: Math.cos(el.lat * (Math.PI / 180)),
+    //lonCos: Math.cos(el.lon * (Math.PI / 180))
+}));
+
 console.log(ICAOS[0], icaos2[0]);
 
 const icaos2string = JSON.stringify(icaos2);

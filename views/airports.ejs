@@ -31,6 +31,7 @@
         </table>
     </div>
     <h2>Found <%= airportsInRange.length %> Airports in a <%= maxDistance %> NM Range around <%= origin %></h2>
+    <% if (candidates && candidates.length > 0) { %><h3>Candidates: <%= candidates.join(", ") %></h3><% } %>
     <div>
         <% for (airport of airportsInRange) { %> 
             <p><%= airport.icao %></p>
