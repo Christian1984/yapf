@@ -24,35 +24,25 @@ class AirportData
         let origin = this.getAirport(originIcao);
         if (!origin) return -1;
 
-        return this.calcDistanceLatLongIcao(origin.lat, origin.lon, destinationIcao);
+        return this.calcDistanceLatLongIcao(origin, destinationIcao);
     }
 
-    calcDistanceLatLongIcao(originLat, originLong, destinationIcao)
+    calcDistanceLatLongIcao(origin, destinationIcao)
     {
         let destination = this.getAirport(destinationIcao);
         if (!destination) return -1;
 
-        return this.calcDistanceLatLong(originLat, originLong, destination.lat, destination.lon);
+        return this.calcDistanceLatLong(origin, destination);
     }
 
-    calcDistanceLatLong(originLat, originLong, destinationLat, destinationLong)
+    calcDistanceLatLong(origin, destination)
     {
-        if (originLat == destinationLat && originLong == destinationLong)
+        if (origin.lat == destination.lat && origin.lon == destination.lon)
         {
             return 0;
         }
 
-        let lat1 = originLat * (Math.PI/180);
-        let long1 = originLong * (Math.PI/180);
-        let lat2 = destinationLat * (Math.PI/180);
-        let long2 = destinationLong * (Math.PI/180);
-
-        let sinLat1 = Math.sin(lat1);
-        let sinLat2 = Math.sin(lat2);
-        let cosLat1 = Math.cos(lat1);
-        let cosLat2 = Math.cos(lat2);
-
-        let distanceRadians = Math.acos(sinLat1 * sinLat2 + cosLat1 * cosLat2 * Math.cos(long2 - long1));
+        let distanceRadians = Math.acos(origin.latSin * destination.latSin + origin.latCos * destination.latCos * Math.cos(destination.lonRad - origin.lonRad));
 
         let distance =  3443.9 * distanceRadians;
 
@@ -66,7 +56,7 @@ class AirportData
 
         console.log("Enter airportsInRange(originIcao, maxDistance)...");
         let begin = new Date().getTime();
-        let inRange = ICAOS.filter((airport) => this.calcDistanceLatLongIcao(origin.lat, origin.lon, airport.icao) <= maxDistance && origin.icao != airport.icao);
+        let inRange = ICAOS.filter((airport) => this.calcDistanceLatLongIcao(origin, airport.icao) <= maxDistance && origin.icao != airport.icao);
         console.log("Finished airportsInRange(originIcao, maxDistance)! Duration: " + (new Date().getTime() - begin) + "ms");
         
         return inRange;

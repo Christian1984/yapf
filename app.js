@@ -9,6 +9,9 @@ const planesRouter = require('./routes/planes');
 const airportsRouter = require('./routes/airports');
 const usersRouter = require('./routes/users');
 
+const ICAOS = require('./routes/utils/icaos');
+const fs = require('fs');
+
 const app = express();
 
 const port = 3000;
@@ -47,5 +50,16 @@ app.use(function(err, req, res, next) {
 app.listen(port, () => {
     console.log(`YAPF listening at http://localhost:${port}`)
 });
+
+/*
+const icaos2 = ICAOS.map(el => ({icao: el.icao,lat: el.lat,lon: el.lon,latRad: el.lat * (Math.PI / 180),lonRad: el.lon * (Math.PI / 180),latSin: Math.sin(el.lat * (Math.PI / 180)),lonSin: Math.sin(el.lon * (Math.PI / 180)),latCos: Math.cos(el.lat * (Math.PI / 180)),lonCos: Math.cos(el.lon * (Math.PI / 180))}));
+console.log(ICAOS[0], icaos2[0]);
+
+const icaos2string = JSON.stringify(icaos2);
+const icaos2unquoted = icaos2string.replace(/"([^"]+)":/g, '$1:');
+
+fs.writeFileSync("icaos.json", icaos2unquoted);
+console.log("File saved!"); 
+*/
 
 module.exports = app;

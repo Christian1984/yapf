@@ -11,10 +11,10 @@ router.get('/', function(req, res, next)
     let originIcao = "EDDK";
     let destinationIcao = "EDDM";
 
-    let origin = airportdata.getAirport(originIcao);    
+    let origin = airportdata.getAirport(originIcao);
     let destination = airportdata.getAirport(destinationIcao);
 
-    let distance = airportdata.calcDistanceLatLong(origin.lat, origin.lon, destination.lat, destination.lon);
+    let distance = airportdata.calcDistanceLatLong(origin, destination);
 
     let maxDistance = 125;
     let airportsInRange = airportdata.airportsInRange(originIcao, maxDistance);
