@@ -1,12 +1,37 @@
 
-<% for (const plane of planes) { %>
-    <tr>
-        <td><%= plane.MakeModel %></td>
-        <td><a href="https://server.fseconomy.net/aircraftlog.jsp?id=<%= plane.SerialNumber %>" target="_blank"><%= plane.Registration %></a></td>
-        <td><a href="https://server.fseconomy.net/airport.jsp?icao=<%= plane.Location %>" target="_blank"><%= plane.Location %></a></td>
-        <td><%= plane.Equipment %></td>
-        <td class="<%= !plane.TimeLast100hr[0] ? 'N/A' : (!plane.TimeLast100hr[0].split(':')[0] ? 'N/A' : (plane.TimeLast100hr[0].split(':')[0] <= minTimeLast100hr ? 'green' : 'red')) %>"><%= plane.TimeLast100hr %></td>
-        <td><%= plane.RentalDry != 0 ? plane.RentalDry : "-" %> / <%= plane.RentalWet != 0 ? plane.RentalWet : "-" %></td>
-        <td><%= plane.RentalDry != 0 || plane.RentalDry != 0 ? Math.round(plane.RentalTime / 3600) : "-" %></td>
-    </tr>
-<% } %>
+
+<% if (errors.length > 0) { %>
+    <h2>WARNING:</h2>
+    <p>Something went wrong! The list of airplanes below might be incomplete...</p>
+    <p>Details: <%= JSON.stringify(errors) %></p>
+<%}%>
+<h2>Airports</h2>
+<p>Requested airplanes found at <%= airportsWithPlanes.length %> airports: <%= airportsWithPlanes.join(", ") %></p>
+<h2>Airplanes</h2>
+<p>Found <%= planes.length %> airplanes of requested types:</p>
+<table id="results">
+    <thead>
+        <tr>
+            <th>Make/Model</th>
+            <th>Registration</th>
+            <th>Location</th>
+            <th>Equipment</th>
+            <th>Time Since Last 100hr</th>
+            <th>Rental (Dry / Wet)</th>
+            <th>Rental Time (hours)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% for (const plane of planes) { %>
+            <tr>
+                <td><%= plane.MakeModel %></td>
+                <td><a href="https://server.fseconomy.net/aircraftlog.jsp?id=<%= plane.SerialNumber %>" target="_blank"><%= plane.Registration %></a></td>
+                <td><a href="https://server.fseconomy.net/airport.jsp?icao=<%= plane.Location %>" target="_blank"><%= plane.Location %></a></td>
+                <td><%= plane.Equipment %></td>
+                <td class="<%= !plane.TimeLast100hr[0] ? 'N/A' : (!plane.TimeLast100hr[0].split(':')[0] ? 'N/A' : (plane.TimeLast100hr[0].split(':')[0] <= minTimeLast100hr ? 'green' : 'red')) %>"><%= plane.TimeLast100hr %></td>
+                <td><%= plane.RentalDry != 0 ? plane.RentalDry : "-" %> / <%= plane.RentalWet != 0 ? plane.RentalWet : "-" %></td>
+                <td><%= plane.RentalDry != 0 || plane.RentalDry != 0 ? Math.round(plane.RentalTime / 3600) : "-" %></td>
+            </tr>
+        <% } %>
+    </tbody>
+</table>

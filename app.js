@@ -73,4 +73,20 @@ fs.writeFileSync("icaos.json", icaos2unquoted);
 console.log("File saved!"); 
 */
 
+let planes = {
+    planes: [
+        {MakeModel: "Cessna 172 Skyhawk", SerialNumber: "12345", Location: "EDDM"},
+        {MakeModel: "Cessna 172 Skyhawk", SerialNumber: "6789", Location: "EDDM"},
+        {MakeModel: "Cessna 152", SerialNumber: "1357", Location: "EDDK"}
+    ]
+}
+
+//let airports = new Set(planes.planes.map((e) => (e.Location)));
+let airports = planes.planes.reduce((acc, el) => {
+    if (!acc.includes(el.Location)) acc.push(el.Location);
+    return acc;
+}, []);
+
+console.log(airports);
+
 module.exports = app;

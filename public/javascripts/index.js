@@ -7,7 +7,7 @@
     const a = document.querySelector("a.send");
     const loadingSpan = document.querySelector("span.loading");
     const doneSpan = document.querySelector("span.done");
-    const resultTable = document.querySelector("table#results>tbody");
+    const resultDiv = document.querySelector("#resultDiv");
 
     function uiUpdateOnRequestStarted()
     {
@@ -23,10 +23,11 @@
         if (doneSpan) doneSpan.hidden = false;
     }
 
-    function populateTable(planesHtml)
+    function populatePage(responseHtml)
     {
-        if(!resultTable) return;
-        resultTable.innerHTML = planesHtml;
+        console.log(resultDiv);
+        if(!resultDiv) return;
+        resultDiv.innerHTML = responseHtml;
     }
 
 
@@ -48,7 +49,7 @@
                         responseHtml = this.response;
                         console.log(responseHtml);
 
-                        populateTable(responseHtml);
+                        populatePage(responseHtml);
 
                         uiUpdateOnRequestFinished();
                     }

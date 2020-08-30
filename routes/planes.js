@@ -26,18 +26,30 @@ class CountdownLatch
 
 function sendResponse(res, responseJson)
 {
-    res.render('planes', { minTimeLast100hr: 95, planes: responseJson.planes });
+    let airportsWithPlanes = getAirportsWithPlanes(responseJson);
+    res.render('planes', { minTimeLast100hr: 95, planes: responseJson.planes, airportsWithPlanes: airportsWithPlanes, errors: responseJson.errs});
 }
 
 function filter(planes, icaos) 
 {
     console.log("planes.length: " + planes.length);
     console.log("icaos.length: " + icaos.length);
-    if (!icaos) return [];
+    if (!icaos || icaos.length == 0) return planes;
 
     let filteredPlanes = planes.filter((p) => icaos.includes(p.Location[0]));
     console.log("filteredPlanes.length: " + filteredPlanes.length);
     return filteredPlanes;
+}
+
+function getAirportsWithPlanes(responseJson)
+{
+    if (!responseJson || !responseJson.planes) return [];
+
+    //let airports = new Set(planes.planes.map((e) => (e.Location)));
+    return responseJson.planes.reduce((acc, el) => {
+        if (!acc.includes(el.Location[0])) acc.push(el.Location[0]);
+        return acc;
+    }, []);
 }
 
 function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
@@ -50,7 +62,7 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
         method: "GET",
         headers: { }
     };
-    
+
     var httpsreq = https.request(options, (response) => 
         {
             let responseXml = "";
@@ -63,7 +75,7 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
             response.on("end", function() 
                 {
                     console.log("responseXml: " + responseXml.substr(0, 255));
-                    let json = xml2js.parseString(responseXml, (err, result) => 
+                    xml2js.parseString(responseXml, (err, result) => 
                         {
                             if (err)
                             {
@@ -94,6 +106,14 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
             );
         }
     );
+    
+    httpsreq.on("error", (e) => 
+        {
+            console.log(e);
+            responseJson.errs.push(e);
+            cdl.Signal();
+        }
+    );
 
     httpsreq.end();
 }
@@ -102,7 +122,8 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
 router.get("/", function(req, res, next)
     {
         const url = "server.fseconomy.net";
-        let icaos = ["EDDM", "EDDK", "KSAS", "EDDW"];
+        let icaos = [];
+        //let icaos = ["EDDM", "EDDK", "KSAS", "EDDW"];
         //let planesMakeModel = ["Cessna 172 Skyhawk"];
         //let planesMakeModel = ["Diamond DA20 Katana"];
         //let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana"];
