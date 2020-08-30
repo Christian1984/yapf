@@ -2,15 +2,18 @@ const express = require("express");
 const router = express.Router();
 const https = require("https");
 const xml2js = require("xml2js");
+const AirportData = require("./utils/airportdata");
 
 class CountdownLatch
 {
-    constructor(counter, onCompletion, response, responseJson)
+    constructor(counter, onCompletion, response, responseJson, icaos, maxDistance)
     {
         this.Counter = counter;
         this.OnCompletion = onCompletion;
         this.Response = response;
         this.ResponseJson = responseJson;
+        this.Icaos = icaos;
+        this.MaxDistance = maxDistance
     }
 
     Signal()
@@ -19,40 +22,59 @@ class CountdownLatch
 
         if (this.Counter <= 0) 
         {
-            this.OnCompletion(this.Response, this.ResponseJson);
+            this.OnCompletion(this.Response, this.ResponseJson, this.Icaos, this.MaxDistance);
         }
     }
 }
 
-function sendResponse(res, responseJson)
+function postProcessResultJson(responseJson, icaos, maxDistance)
 {
-    let airportsWithPlanes = getAirportsWithPlanes(responseJson);
-    res.render('planes', { minTimeLast100hr: 95, planes: responseJson.planes, airportsWithPlanes: airportsWithPlanes, errors: responseJson.errs});
+    const airportsWithPlanes = getAirportsWithPlanes(responseJson.planes);
+    responseJson.airportsWithPlanes = airportsWithPlanes;
+
+    const airportdata = new AirportData();
+
+    let inRangeIcaos = [];
+    for (const icao of icaos)
+    {
+        const airportInRangeOfIcao = airportdata.airportsInRange(icao, maxDistance, airportsWithPlanes);
+        const icaosInRangeOfIcao = airportInRangeOfIcao.map((el) => el.icao);
+        inRangeIcaos.push(...icaosInRangeOfIcao);
+    }
+
+    let filteredPlanes = filter(responseJson.planes, inRangeIcaos);
+    responseJson.planes = filteredPlanes;
+}
+
+function sendResponse(res, responseJson, icaos, maxDistance)
+{
+    postProcessResultJson(responseJson, icaos, maxDistance);    
+    res.render('planes', responseJson);
 }
 
 function filter(planes, icaos) 
 {
     console.log("planes.length: " + planes.length);
     console.log("icaos.length: " + icaos.length);
-    if (!icaos || icaos.length == 0) return planes;
+    if (!icaos) return planes;
 
     let filteredPlanes = planes.filter((p) => icaos.includes(p.Location[0]));
     console.log("filteredPlanes.length: " + filteredPlanes.length);
     return filteredPlanes;
 }
 
-function getAirportsWithPlanes(responseJson)
+function getAirportsWithPlanes(planes)
 {
-    if (!responseJson || !responseJson.planes) return [];
+    if (!planes) return [];
 
     //let airports = new Set(planes.planes.map((e) => (e.Location)));
-    return responseJson.planes.reduce((acc, el) => {
+    return planes.reduce((acc, el) => {
         if (!acc.includes(el.Location[0])) acc.push(el.Location[0]);
         return acc;
     }, []);
 }
 
-function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
+function getPlanes(url, planeMakeModel, cdl, responseJson)
 {
     const path = `/data?userkey=2E87E63F0552DF38&format=json&query=aircraft&search=makemodel&makemodel=${encodeURIComponent(planeMakeModel)}`;
     
@@ -74,32 +96,33 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
             );
             response.on("end", function() 
                 {
-                    console.log("responseXml: " + responseXml.substr(0, 255));
-                    xml2js.parseString(responseXml, (err, result) => 
-                        {
-                            if (err)
-                            {
-                                console.log(err);
-                                responseJson.errs.push(err);
-                            }
-                            else
-                            {
-                                responseJson.msgs.push(`Received data for ${planeMakeModel}`);
-                                if (result)
-                                {
-                                    if (result.AircraftItems)
-                                    {
-                                        let planes = filter(result.AircraftItems.Aircraft, icaos);
+                    //console.log("responseXml: " + responseXml.substr(0, 255));
 
-                                        if (planes)
-                                        {
-                                            responseJson.planes.push(...planes);
-                                        }
+                    try 
+                    {
+                        xml2js.parseString(responseXml, (err, result) => 
+                            {
+                                if (err)
+                                {
+                                    console.log(err);
+                                    responseJson.errs.push(err);
+                                }
+                                else
+                                {
+                                    responseJson.msgs.push(`Received data for ${planeMakeModel}`);
+                                    if (result && result.AircraftItems && result.AircraftItems.Aircraft && Array.isArray(result.AircraftItems.Aircraft))
+                                    {
+                                        responseJson.planes.push(...result.AircraftItems.Aircraft);
                                     }
                                 }
                             }
-                        }
-                    );
+                        );
+                    }
+                    catch (e)
+                    {
+                        console.log(e);
+                        responseJson.errs.push(e);
+                    }
 
                     cdl.Signal();
                 }
@@ -122,8 +145,12 @@ function getPlanes(url, planeMakeModel, icaos, cdl, responseJson)
 router.get("/", function(req, res, next)
     {
         const url = "server.fseconomy.net";
-        let icaos = [];
-        //let icaos = ["EDDM", "EDDK", "KSAS", "EDDW"];
+        let maxDistance = 250;
+        let minTimeLast100hr = 95
+        //let icaos = [];
+        //let icaos = ["HKMT"];
+        //let icaos = ["EDDK"];
+        let icaos = ["EDDM", "EDDK", "KSAS", "EDDW"];
         //let planesMakeModel = ["Cessna 172 Skyhawk"];
         //let planesMakeModel = ["Diamond DA20 Katana"];
         //let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana"];
@@ -132,14 +159,19 @@ router.get("/", function(req, res, next)
         let responseJson = { 
             errs: [],
             msgs: [],
-            planes: []
+            planes: [],
+            airportsWithPlanes: [],
+            planesMakeModel: planesMakeModel,
+            requestedIcaos: icaos,
+            maxDistance: maxDistance,
+            minTimeLast100hr: minTimeLast100hr
         };
 
-        const cdl = new CountdownLatch(planesMakeModel.length, sendResponse, res, responseJson);
+        const cdl = new CountdownLatch(planesMakeModel.length, sendResponse, res, responseJson, icaos, maxDistance);
 
         for (const pmm of planesMakeModel)
         {
-            getPlanes(url, pmm, icaos, cdl, responseJson);
+            getPlanes(url, pmm, cdl, responseJson);
         }
     }
 );

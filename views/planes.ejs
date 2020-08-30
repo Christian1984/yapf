@@ -1,14 +1,15 @@
 
 
-<% if (errors.length > 0) { %>
+<% if (errs.length > 0) { %>
     <h2>WARNING:</h2>
-    <p>Something went wrong! The list of airplanes below might be incomplete...</p>
-    <p>Details: <%= JSON.stringify(errors) %></p>
+    <p>Something went wrong! The list of airplanes below might be incomplete... Details:</p>
+    <% for (const err of errs) {%>
+        <pre><%= JSON.stringify(err) %></pre>
+    <%} %>
 <%}%>
-<h2>Airports</h2>
-<p>Requested airplanes found at <%= airportsWithPlanes.length %> airports: <%= airportsWithPlanes.join(", ") %></p>
+
 <h2>Airplanes</h2>
-<p>Found <%= planes.length %> airplanes of requested types:</p>
+<p>Found <%= planes.length %> airplanes of Make/Model [<%= planesMakeModel.join(", ") %>] inside <%= maxDistance %> NM range around <%= requestedIcaos.join(", ") %>:</p>
 <table id="results">
     <thead>
         <tr>
@@ -35,3 +36,7 @@
         <% } %>
     </tbody>
 </table>
+
+<h2>Airports</h2>
+<p>Airplanes of Make/Model [<%= planesMakeModel.join(", ") %>] found at <%= airportsWithPlanes.length %> airports worldwide:</p>
+<p><%= airportsWithPlanes.join(", ") %></p>
