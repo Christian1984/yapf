@@ -29,6 +29,12 @@ class CountdownLatch
 
 function postProcessResultJson(responseJson, icaos, maxDistance)
 {
+    if (responseJson.onlyRentable)
+    {
+        const rentableAirplanes = responseJson.planes.filter(plane => !(plane.RentalTime == 0) && (!(plane.RentalDry == 0) || !(plane.RentalWet == 0)));
+        responseJson.planes = rentableAirplanes;
+    }
+
     const airportsWithPlanes = getAirportsWithPlanes(responseJson.planes);
     responseJson.airportsWithPlanes = airportsWithPlanes;
 
@@ -146,7 +152,8 @@ router.get("/", function(req, res, next)
     {
         const url = "server.fseconomy.net";
         let maxDistance = 250;
-        let minTimeLast100hr = 95
+        let minTimeLast100hr = 95;
+        let onlyRentable = true;
         //let icaos = [];
         //let icaos = ["HKMT"];
         //let icaos = ["EDDK"];
@@ -154,7 +161,8 @@ router.get("/", function(req, res, next)
         //let planesMakeModel = ["Cessna 172 Skyhawk"];
         //let planesMakeModel = ["Diamond DA20 Katana"];
         //let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana"];
-        let planesMakeModel = ["Cessna Citation II", "Columbia 400"];
+        let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana", "Cessna Citation II", "Columbia 400"];
+        //let planesMakeModel = ["Cessna Citation II", "Columbia 400"];
         
         let responseJson = { 
             errs: [],
@@ -164,7 +172,8 @@ router.get("/", function(req, res, next)
             planesMakeModel: planesMakeModel,
             requestedIcaos: icaos,
             maxDistance: maxDistance,
-            minTimeLast100hr: minTimeLast100hr
+            minTimeLast100hr: minTimeLast100hr,
+            onlyRentable: onlyRentable
         };
 
         const cdl = new CountdownLatch(planesMakeModel.length, sendResponse, res, responseJson, icaos, maxDistance);

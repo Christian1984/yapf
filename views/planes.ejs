@@ -9,7 +9,7 @@
 <%}%>
 
 <h2>Airplanes</h2>
-<p>Found <%= planes.length %> airplanes of Make/Model [<%= planesMakeModel.join(", ") %>] inside <%= maxDistance %> NM range around <%= requestedIcaos.join(", ") %>:</p>
+<p>Found <%= planes.length %> <% if (onlyRentable) {%>rentable<%}%> airplanes of Make/Model [<%= planesMakeModel.join(", ") %>] inside a <%= maxDistance %> NM range around [<%= requestedIcaos.join(", ") %>]:</p>
 <table id="results">
     <thead>
         <tr>
