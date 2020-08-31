@@ -1,24 +1,60 @@
-//const { response } = require("express");
-
 (function()
 {
-    console.log("index.js loaded!");
-
-    const a = document.querySelector("a.send");
+    const requestPlanesButton = document.querySelector("input#requestPlanes");
     const loadingSpan = document.querySelector("span.loading");
     const doneSpan = document.querySelector("span.done");
     const resultDiv = document.querySelector("#resultDiv");
 
+    const readaccesskeyInput = document.querySelector("input#readaccesskey");
+    const planemakemodelInput = document.querySelector("input#planemakemodel");
+    const airportsicaoInput = document.querySelector("input#airportsicao");
+    const rangeInput = document.querySelector("input#range");
+
+    /*
+    let storedReadaccesskey = window.localStorage.getItem("readaccesskey");
+    if (storedReadaccesskey) readaccesskeyInput.value = storedReadaccesskey;
+
+    if (readaccesskeyInput)
+    {
+        readaccesskeyInput.addEventListener("input", (e) => 
+            {
+                window.localStorage.setItem("readaccesskey", readaccesskeyInput.value);
+            }
+        );
+    }
+    */
+
+    function populateFromStorage(element)
+    {
+        if (element)
+        {
+            let storedValue = window.localStorage.getItem(element.id);
+            if (storedValue) element.value = storedValue;
+        }
+    }
+
+    function initStorageListener(element)
+    {
+        if (element)
+        {
+            element.addEventListener("input", () => 
+                {
+                    window.localStorage.setItem(element.id, element.value);
+                }
+            );
+        }
+    }
+
     function uiUpdateOnRequestStarted()
     {
-        if (a) a.hidden = true;
+        if (requestPlanesButton) requestPlanesButton.disabled = true;
         if (loadingSpan) loadingSpan.hidden = false;
         if (doneSpan) doneSpan.hidden = true;
     }
 
     function uiUpdateOnRequestFinished()
     {
-        if (a) a.hidden = false;
+        if (requestPlanesButton) requestPlanesButton.disabled = false;
         if (loadingSpan) loadingSpan.hidden = true;
         if (doneSpan) doneSpan.hidden = false;
     }
@@ -30,18 +66,28 @@
         resultDiv.innerHTML = responseHtml;
     }
 
+    populateFromStorage(readaccesskeyInput);
+    populateFromStorage(planemakemodelInput);
+    populateFromStorage(airportsicaoInput);
+    populateFromStorage(rangeInput);
+    
+    initStorageListener(readaccesskeyInput);
+    initStorageListener(planemakemodelInput);
+    initStorageListener(airportsicaoInput);
+    initStorageListener(rangeInput);
 
-    if(a) 
+    if (requestPlanesButton) 
     {
-        a.addEventListener("click", (e) => 
+        requestPlanesButton.addEventListener("click", (e) => 
             {
                 e.preventDefault();
-                console.log("a clicked!");
+                console.log("#requestPlanes clicked!");
 
                 uiUpdateOnRequestStarted();
 
                 const xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
+                xhttp.onreadystatechange = function() 
+                {
                     if (this.readyState == 4 && this.status == 200) 
                     {
                         console.log(this);
@@ -54,8 +100,22 @@
                         uiUpdateOnRequestFinished();
                     }
                 };
-                xhttp.open("GET", "/planes", true);
-                xhttp.send();
+
+                let readaccesskey = readaccesskeyInput ? readaccesskeyInput.value : "";
+                let planemakemodel = planemakemodelInput ? planemakemodelInput.value : "";
+                let airportsicao = airportsicaoInput ? airportsicaoInput.value : "";
+                let range = rangeInput ? rangeInput.value : "";
+
+                let data = {
+                    readaccesskey: readaccesskey,
+                    planemakemodel: planemakemodel,
+                    airportsicao: airportsicao,
+                    range: range
+                };
+
+                xhttp.open("POST", "/planes");
+                xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhttp.send(JSON.stringify(data));
             }
         );
     }

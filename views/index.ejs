@@ -8,26 +8,23 @@
     <h1><%= title %></h1>
     <!-- <p>Welcome to <%= title %></p> -->
     <div>
-        <form action="/planes" method="post" target="_self">
-                <label for="readaccesskey">Read Access Key</label>
-                <input type="text" id="readaccesskey" name="readaccesskey" placeholder="8CD192DC0F423E33FR" /><br />
+        <form>
+            <label for="readaccesskey">Read Access Key</label>
+            <input type="text" id="readaccesskey" name="readaccesskey" placeholder="8CD192DC0F423E33FR" /><br />
 
-                <label for="planemakemodel">Plane (Make/Model)</label>
-                <input type="text" id="planemakemodel" name="planemakemodel" placeholder="Cessna 172 Skyhawk, Diamond DA20 Katana" /><br />
+            <label for="planemakemodel">Plane (Make/Model)</label>
+            <input type="text" id="planemakemodel" name="planemakemodel" placeholder="Cessna 172 Skyhawk, Diamond DA20 Katana" /><br />
 
-                <label for="airportsicao">Airports (ICAO)</label>
-                <input type="text" id="airportsicao" name="airportsicao" placeholder="EDDK, EDDM, EDDT" /><br />
+            <label for="airportsicao">Airports (ICAO)</label>
+            <input type="text" id="airportsicao" name="airportsicao" placeholder="EDDK, EDDM, EDDT" /><br />
 
-                <label for="range">Range (NM)</label>
-                <input type="text" id="range" name="range" placeholder="150" /><br />
+            <label for="range">Range (NM)</label>
+            <input type="number" min="0" step="50" id="range" name="range" placeholder="150" /><br />
 
-                <input type="button" value="Find planes...">
+            <input type="button" id="requestPlanes" value="Find planes...">
+            <span class="loading" hidden>loading...</span>
+            <span class="done" hidden>done!</span>
         </form>
-    </div>
-    <div>
-        <a class="send" href="#">request planes!</a>
-        <span class="loading" hidden>loading...</span>
-        <span class="done" hidden>done!</span>
     </div>
     <div id="resultDiv">
     </div>

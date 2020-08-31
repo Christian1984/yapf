@@ -39,4 +39,4 @@
 
 <h2>Airports</h2>
 <p>Airplanes of Make/Model [<%= planesMakeModel.join(", ") %>] found at <%= airportsWithPlanes.length %> airports worldwide:</p>
-<p><%= airportsWithPlanes.join(", ") %></p>
+<p><% for (const icao of airportsWithPlanes) {%> <a href="https://server.fseconomy.net/airport.jsp?icao=<%= icao %>" target="_blank"><%= icao %></a>, <%}%></p>

@@ -73,17 +73,16 @@ function getAirportsWithPlanes(planes)
 {
     if (!planes) return [];
 
-    //let airports = new Set(planes.planes.map((e) => (e.Location)));
     return planes.reduce((acc, el) => {
         if (!acc.includes(el.Location[0])) acc.push(el.Location[0]);
         return acc;
     }, []);
 }
 
-function getPlanes(url, planeMakeModel, cdl, responseJson)
+function getPlanes(url, readaccesskey, planeMakeModel, cdl, responseJson)
 {
-    const path = `/data?userkey=2E87E63F0552DF38&format=json&query=aircraft&search=makemodel&makemodel=${encodeURIComponent(planeMakeModel)}`;
-    
+    const path = `/data?userkey=${readaccesskey}&format=json&query=aircraft&search=makemodel&makemodel=${encodeURIComponent(planeMakeModel)}`;
+
     var options = {
         host: url,
         path: path,
@@ -102,8 +101,6 @@ function getPlanes(url, planeMakeModel, cdl, responseJson)
             );
             response.on("end", function() 
                 {
-                    //console.log("responseXml: " + responseXml.substr(0, 255));
-
                     try 
                     {
                         xml2js.parseString(responseXml, (err, result) => 
@@ -148,40 +145,74 @@ function getPlanes(url, planeMakeModel, cdl, responseJson)
 }
 
 /* GET planes */
-router.get("/", function(req, res, next)
+router.post("/", function(req, res, next)
     {
-        const url = "server.fseconomy.net";
-        let maxDistance = 250;
-        let minTimeLast100hr = 95;
-        let onlyRentable = true;
-        //let icaos = [];
-        //let icaos = ["HKMT"];
-        //let icaos = ["EDDK"];
-        let icaos = ["EDDM", "EDDK", "KSAS", "EDDW"];
-        //let planesMakeModel = ["Cessna 172 Skyhawk"];
-        //let planesMakeModel = ["Diamond DA20 Katana"];
-        //let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana"];
-        let planesMakeModel = ["Cessna 172 Skyhawk", "Diamond DA20 Katana", "Cessna Citation II", "Columbia 400"];
-        //let planesMakeModel = ["Cessna Citation II", "Columbia 400"];
-        
-        let responseJson = { 
-            errs: [],
-            msgs: [],
-            planes: [],
-            airportsWithPlanes: [],
-            planesMakeModel: planesMakeModel,
-            requestedIcaos: icaos,
-            maxDistance: maxDistance,
-            minTimeLast100hr: minTimeLast100hr,
-            onlyRentable: onlyRentable
-        };
+        console.log('Got body:', req.body);
 
-        const cdl = new CountdownLatch(planesMakeModel.length, sendResponse, res, responseJson, icaos, maxDistance);
-
-        for (const pmm of planesMakeModel)
+        try 
         {
-            getPlanes(url, pmm, cdl, responseJson);
+            let postData = req.body;
+
+            // icaos
+            let icaos = [];
+
+            try
+            {
+                icaos = req.body.airportsicao.split(",").map(el => el.trim());
+            }
+            catch(e)
+            {
+                console.log(e);
+            }
+
+            // planes
+            let planesMakeModel = [];
+
+            try
+            {
+                planesMakeModel = req.body.planemakemodel.split(",").map(el => el.trim());
+            }
+            catch(e)
+            {
+                console.log(e);
+            }
+            
+            // strings
+            let maxDistance = parseInt(postData.range) != NaN ? parseInt(postData.range) : 0;
+            let readaccesskey = postData.readaccesskey ? postData.readaccesskey.trim() : ""; //2E87E63F0552DF38
+
+            // other
+            let minTimeLast100hr = 95;
+            let onlyRentable = true;
+
+            const url = "server.fseconomy.net";
+            
+            let responseJson = { 
+                errs: [],
+                msgs: [],
+                planes: [],
+                airportsWithPlanes: [],
+                planesMakeModel: planesMakeModel,
+                requestedIcaos: icaos,
+                maxDistance: maxDistance,
+                minTimeLast100hr: minTimeLast100hr,
+                onlyRentable: onlyRentable
+            };
+    
+            const cdl = new CountdownLatch(planesMakeModel.length, sendResponse, res, responseJson, icaos, maxDistance);
+    
+            for (const pmm of planesMakeModel)
+            {
+                getPlanes(url, readaccesskey, pmm, cdl, responseJson);
+            }
         }
+        catch (e)
+        {
+            // TODO
+            console.log(e);
+            res.send("ERROR!");
+        }
+
     }
 );
 
