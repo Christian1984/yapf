@@ -66,6 +66,27 @@
         resultDiv.innerHTML = responseHtml;
     }
 
+    function requestJobs(icaos)
+    {
+        const xhttp = new XMLHttpRequest();
+        
+        xhttp.onreadystatechange = function() 
+        {
+            if (this.readyState == 4 && this.status == 200) 
+            {
+                console.log(this);
+            }
+        };
+
+        let data = {
+            icaos: icaos
+        };
+
+        xhttp.open("POST", "/jobs");
+        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhttp.send(JSON.stringify(data));
+    }
+
     populateFromStorage(readaccesskeyInput);
     populateFromStorage(planemakemodelInput);
     populateFromStorage(airportsicaoInput);
@@ -90,13 +111,10 @@
                 {
                     if (this.readyState == 4 && this.status == 200) 
                     {
-                        console.log(this);
-
-                        responseHtml = this.response;
-                        console.log(responseHtml);
-
-                        populatePage(responseHtml);
-
+                        //console.log(this);
+                        //console.log(this.response);
+                        populatePage(this.response);
+                        requestJobs(["EDDK"]);
                         uiUpdateOnRequestFinished();
                     }
                 };

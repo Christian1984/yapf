@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
 const https = require("https");
 const xml2js = require("xml2js");
 const AirportData = require("./utils/airportdata");
+const express = require("express");
+const router = express.Router();
 
 class CountdownLatch
 {
@@ -81,7 +81,7 @@ function getAirportsWithPlanes(planes)
 
 function getPlanes(url, readaccesskey, planeMakeModel, cdl, responseJson)
 {
-    const path = `/data?userkey=${readaccesskey}&format=json&query=aircraft&search=makemodel&makemodel=${encodeURIComponent(planeMakeModel)}`;
+    const path = `/data?userkey=${readaccesskey}&format=xml&query=aircraft&search=makemodel&makemodel=${encodeURIComponent(planeMakeModel)}`;
 
     var options = {
         host: url,
@@ -144,7 +144,7 @@ function getPlanes(url, readaccesskey, planeMakeModel, cdl, responseJson)
     httpsreq.end();
 }
 
-/* GET planes */
+/* POST planes */
 router.post("/", function(req, res, next)
     {
         console.log('Got body:', req.body);

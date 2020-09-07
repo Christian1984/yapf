@@ -8,9 +8,10 @@ const indexRouter = require('./routes/index');
 const planesRouter = require('./routes/planes');
 const airportsRouter = require('./routes/airports');
 const usersRouter = require('./routes/users');
+const jobsRouter = require('./routes/jobs');
 
-const ICAOS = require('./routes/utils/icaos');
-const fs = require('fs');
+//const ICAOS = require('./routes/utils/icaos');
+//const fs = require('fs');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/', indexRouter);
 app.use('/planes', planesRouter);
 app.use('/airports', airportsRouter);
 app.use('/users', usersRouter);
+app.use('/jobs', jobsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
