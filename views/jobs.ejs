@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+      <h1>Jobs-Controller-Tester</h1>
+    <table>
+        <tr>
+            <th>ICAO</th>
+            <th>Jobs</th>
+        </tr>
+        <% for (const icao in icaos) { %>
+            <tr>
+                <td><%= icao %></td>
+                <td><%= icaos[icao] %></td>
+            </tr>
+        <% } %>
+    </table>
+    <h2>Raw Json</h2>
+    <div><pre><%= JSON.stringify(json) %></pre></div>
+  </body>
+</html>

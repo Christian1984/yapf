@@ -10,7 +10,7 @@
 
 <h2>Airplanes</h2>
 <p>Found <%= planes.length %> <% if (onlyRentable) {%>rentable<%}%> airplanes of Make/Model [<%= planesMakeModel.join(", ") %>] inside a <%= maxDistance %> NM range around [<%= requestedIcaos.join(", ") %>]:</p>
-<table id="results">
+<table id="results" data-icaos="<%= airportsWithPlanesInRange.join("-") %>">
     <thead>
         <tr>
             <th>Make/Model</th>
@@ -33,7 +33,7 @@
                 <td><%= plane.RentalDry != 0 ? plane.RentalDry : "-" %> / <%= plane.RentalWet != 0 ? plane.RentalWet : "-" %></td>
                 <td><%= plane.RentalDry != 0 || plane.RentalDry != 0 ? Math.round(plane.RentalTime / 3600) : "-" %></td>
                 <td><a href="https://server.fseconomy.net/airport.jsp?icao=<%= plane.Location %>" target="_blank"><%= plane.Location %></a></td>
-                <td>...</td>
+                <td data-icao="<%= plane.Location %>">...</td>
             </tr>
         <% } %>
     </tbody>

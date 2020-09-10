@@ -5,15 +5,13 @@ const xml2js = require("xml2js");
 const express = require('express');
 const router = express.Router();
 
+const url = "server.fseconomy.net";
 
-function getJobs(url, readaccesskey, icaos, res)
+
+function getJobs(url, readaccesskey, icaos, res, callback)
 {
-    const dashSeparatedIcaoString = icaos.map(e => e.trim()).join("-");
-    console.log("Requesting jobs for: " + dashSeparatedIcaoString);
-    //https://server.fseconomy.net/data?userkey=2E87E63F0552DF38&format=xml&query=icao&search=jobsfrom&icaos=CZFA-CEX4-CYMA
-    
-    const path = `/data?userkey=${readaccesskey}&format=xml&query=icao&search=jobsfrom&icaos=${encodeURIComponent(dashSeparatedIcaoString)}`;
-    //console.log(path);
+    console.log("Requesting jobs for: " + icaos);
+    const path = `/data?userkey=${readaccesskey}&format=xml&query=icao&search=jobsfrom&icaos=${encodeURIComponent(icaos)}`;
 
     let responseJson = { 
         errs: [],
@@ -50,13 +48,25 @@ function getJobs(url, readaccesskey, icaos, res)
                                 }
                                 else
                                 {
-                                    responseJson.msgs.push(`Received job data for ${dashSeparatedIcaoString}`);
-                                    console.log(result);
-                                    responseJson.jobs = result;
-                                    //TODO
+                                    responseJson.msgs.push(`Received job data for ${icaos}`);
+                                    //console.log(result);
 
-                                    res.json(responseJson);
+                                    let jobs = [];
+
+                                    if (result.IcaoJobsFrom) {
+                                        if (result.IcaoJobsFrom.Assignment) {
+                                            const icaosList = result.IcaoJobsFrom.Assignment.map(el => el.FromIcao[0]);
+                                            const icaosSet = Array.from(new Set(icaosList));
+                                            const initial = icaosSet.reduce((acc,el) => ({...acc, [el]: 0}), {});
+                                            const jobsFromIcaos = icaosList.reduce((acc, el) => ({...acc, [el]: acc[el] + 1}), initial);
+                                            jobs = jobsFromIcaos
+                                        }
+    
+                                        responseJson.jobs = jobs;
+                                    }
                                 }
+
+                                callback(res, responseJson)
                             }
                         );
                     }
@@ -64,6 +74,8 @@ function getJobs(url, readaccesskey, icaos, res)
                     {
                         console.log(e);
                         responseJson.errs.push(e);
+
+                        callback(res, responseJson)
                     }
                 }
             );
@@ -83,15 +95,36 @@ function getJobs(url, readaccesskey, icaos, res)
 /* POST jobs. */
 router.post('/', function(req, res, next) 
 {
-
-    const url = "server.fseconomy.net";
-
     //let readaccesskey = postData.readaccesskey ? postData.readaccesskey.trim() : ""; //2E87E63F0552DF38
     let readaccesskey = "2E87E63F0552DF38";
+    let icaos = "EDDM-EDDK";
 
-    let icaos = ["EDDK", "EDDM"];
+    getJobs(url, readaccesskey, icaos, res, (res, json) => {
+        //TODO
+        res.json(json);
+    });
+});
 
-    getJobs(url, readaccesskey, icaos, res);
+/* GET jobs. */
+router.get('/', function(req, res, next) {
+    let readaccesskey = "2E87E63F0552DF38";
+    const icaos = "EDDM-EDDK";
+
+    getJobs(url, readaccesskey, icaos, res, (res, json) => {
+        const jobs = json.jobs;
+
+        const data = {
+            /*icaos: {
+                "EDDM": 3,
+                "EDDK": 2
+            },*/
+            icaos: jobs,
+            json: json
+        };
+    
+        res.render('jobs', data);
+    });
+
 });
 
 module.exports = router;

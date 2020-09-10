@@ -47,7 +47,8 @@ function postProcessResultJson(responseJson, icaos, maxDistance)
         const icaosInRangeOfIcao = airportInRangeOfIcao.map((el) => el.icao);
         inRangeIcaos.push(...icaosInRangeOfIcao);
     }
-
+    responseJson.airportsWithPlanesInRange = inRangeIcaos;
+    
     let filteredPlanes = filter(responseJson.planes, inRangeIcaos);
     responseJson.planes = filteredPlanes;
 }
@@ -192,6 +193,7 @@ router.post("/", function(req, res, next)
                 msgs: [],
                 planes: [],
                 airportsWithPlanes: [],
+                airportsWithPlanesInRange: [],
                 planesMakeModel: planesMakeModel,
                 requestedIcaos: icaos,
                 maxDistance: maxDistance,
