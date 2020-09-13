@@ -95,12 +95,8 @@ function getJobs(url, readaccesskey, icaos, res, callback)
 /* POST jobs. */
 router.post('/', function(req, res, next) 
 {
-    //let readaccesskey = postData.readaccesskey ? postData.readaccesskey.trim() : ""; //2E87E63F0552DF38
-    //const readaccesskey = "2E87E63F0552DF38";
-    const readaccesskey = req.body.readaccesskey;
-    
-    //const icaos = "EDDM-EDDK";
-    const icaos = req.body.icaos;
+    const readaccesskey = req.body.readaccesskey ? req.body.readaccesskey.trim() : "";
+    const icaos = req.body.icaos; // e.g. "EDDM-EDDK"
 
     getJobs(url, readaccesskey, icaos, res, (res, json) => {
         //TODO
@@ -109,13 +105,10 @@ router.post('/', function(req, res, next)
 });
 
 /* GET jobs. */
-router.get('/', function(req, res, next) {
-    // http://localhost:3000/jobs?icaos=EDDM-EDDK&readaccesskey=2E87E63F0552DF38
-    //const readaccesskey = "2E87E63F0552DF38";
+router.get('/', function(req, res, next)
+{
     const readaccesskey = req.query.readaccesskey;
-
-    //const icaos = "EDDM-EDDK-KRYN";
-    const icaos = req.query.icaos;
+    const icaos = req.query.icaos; //e.g. "EDDM-EDDK-KRYN"
 
     getJobs(url, readaccesskey, icaos, res, (res, json) => {
         const jobs = json.jobs;

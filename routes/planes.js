@@ -48,7 +48,7 @@ function postProcessResultJson(responseJson, icaos, maxDistance)
         inRangeIcaos.push(...icaosInRangeOfIcao);
     }
     responseJson.airportsWithPlanesInRange = inRangeIcaos;
-    
+
     let filteredPlanes = filter(responseJson.planes, inRangeIcaos);
     responseJson.planes = filteredPlanes;
 }
@@ -180,7 +180,7 @@ router.post("/", function(req, res, next)
             
             // strings
             let maxDistance = parseInt(postData.range) != NaN ? parseInt(postData.range) : 0;
-            let readaccesskey = postData.readaccesskey ? postData.readaccesskey.trim() : ""; //2E87E63F0552DF38
+            let readaccesskey = postData.readaccesskey ? postData.readaccesskey.trim() : "";
 
             // other
             let minTimeLast100hr = 95;
