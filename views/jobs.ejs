@@ -12,7 +12,7 @@
         </tr>
         <% for (const icao in icaos) { %>
             <tr>
-                <td><%= icao %></td>
+                <td><a href="https://server.fseconomy.net/airport.jsp?icao=<%= icao %>" target="_blank"><%= icao %></a></td>
                 <td><%= icaos[icao] %></td>
             </tr>
         <% } %>

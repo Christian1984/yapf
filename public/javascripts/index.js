@@ -61,25 +61,61 @@
 
     function populatePage(responseHtml)
     {
-        console.log(resultDiv);
+        //console.log(resultDiv);
         if(!resultDiv) return;
         resultDiv.innerHTML = responseHtml;
     }
 
-    function requestJobs(icaos)
+    function requestJobs(readaccesskey, icaos)
     {
         const xhttp = new XMLHttpRequest();
         
         xhttp.onreadystatechange = function() 
         {
-            if (this.readyState == 4 && this.status == 200) 
+            if (this.readyState == 4) 
             {
-                console.log(this);
+                if (this.status == 200)
+                {
+                    //console.log(this);
+
+                    try
+                    {
+                        const responseText = JSON.parse(this.responseText);
+                        const icaos = responseText.jobs;
+
+                        const tdsIcao = document.querySelectorAll("table#results>tbody>tr>td.icao");
+    
+                        for (let td of tdsIcao)
+                        {
+                            let icao = td.dataset.icao;
+
+                            if (icao)
+                            {
+                                if (icaos[icao] !== undefined)
+                                {
+                                    td.textContent = icaos[icao];
+                                }
+                                else
+                                {
+                                    td.textContent = "?";
+                                }
+                            }
+                        }
+                    }
+                    catch (e)
+                    {
+                        console.log(e);
+                        uiUpdateOnRequestFinished();
+                    }
+                }
+
+                uiUpdateOnRequestFinished();
             }
         };
 
         let data = {
-            icaos: icaos
+            readaccesskey,
+            icaos
         };
 
         xhttp.open("POST", "/jobs");
@@ -102,7 +138,12 @@
         requestPlanesButton.addEventListener("click", (e) => 
             {
                 e.preventDefault();
-                console.log("#requestPlanes clicked!");
+                //console.log("#requestPlanes clicked!");
+
+                let readaccesskey = readaccesskeyInput ? readaccesskeyInput.value : "";
+                let planemakemodel = planemakemodelInput ? planemakemodelInput.value : "";
+                let airportsicao = airportsicaoInput ? airportsicaoInput.value : "";
+                let range = rangeInput ? rangeInput.value : "";
 
                 uiUpdateOnRequestStarted();
 
@@ -114,15 +155,29 @@
                         //console.log(this);
                         //console.log(this.response);
                         populatePage(this.response);
-                        requestJobs(["EDDK"]);
-                        uiUpdateOnRequestFinished();
+
+                        const table = document.querySelector("table#results");
+
+                        if (table)
+                        {
+                            const icaosString = table.dataset.icaos;
+
+                            if (icaosString)
+                            {
+                                requestJobs(readaccesskey, icaosString);
+                            }
+                            else
+                            {
+                                uiUpdateOnRequestFinished();
+                            }
+                        }
+                        else
+                        {
+                            uiUpdateOnRequestFinished();
+                        }
                     }
                 };
 
-                let readaccesskey = readaccesskeyInput ? readaccesskeyInput.value : "";
-                let planemakemodel = planemakemodelInput ? planemakemodelInput.value : "";
-                let airportsicao = airportsicaoInput ? airportsicaoInput.value : "";
-                let range = rangeInput ? rangeInput.value : "";
 
                 let data = {
                     readaccesskey: readaccesskey,

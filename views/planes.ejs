@@ -33,7 +33,7 @@
                 <td><%= plane.RentalDry != 0 ? plane.RentalDry : "-" %> / <%= plane.RentalWet != 0 ? plane.RentalWet : "-" %></td>
                 <td><%= plane.RentalDry != 0 || plane.RentalDry != 0 ? Math.round(plane.RentalTime / 3600) : "-" %></td>
                 <td><a href="https://server.fseconomy.net/airport.jsp?icao=<%= plane.Location %>" target="_blank"><%= plane.Location %></a></td>
-                <td data-icao="<%= plane.Location %>">...</td>
+                <td class="icao" data-icao="<%= plane.Location %>">...</td>
             </tr>
         <% } %>
     </tbody>

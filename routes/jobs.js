@@ -10,7 +10,7 @@ const url = "server.fseconomy.net";
 
 function getJobs(url, readaccesskey, icaos, res, callback)
 {
-    console.log("Requesting jobs for: " + icaos);
+    //console.log("Requesting jobs for: " + icaos);
     const path = `/data?userkey=${readaccesskey}&format=xml&query=icao&search=jobsfrom&icaos=${encodeURIComponent(icaos)}`;
 
     let responseJson = { 
@@ -96,8 +96,11 @@ function getJobs(url, readaccesskey, icaos, res, callback)
 router.post('/', function(req, res, next) 
 {
     //let readaccesskey = postData.readaccesskey ? postData.readaccesskey.trim() : ""; //2E87E63F0552DF38
-    let readaccesskey = "2E87E63F0552DF38";
-    let icaos = "EDDM-EDDK";
+    //const readaccesskey = "2E87E63F0552DF38";
+    const readaccesskey = req.body.readaccesskey;
+    
+    //const icaos = "EDDM-EDDK";
+    const icaos = req.body.icaos;
 
     getJobs(url, readaccesskey, icaos, res, (res, json) => {
         //TODO
@@ -107,8 +110,12 @@ router.post('/', function(req, res, next)
 
 /* GET jobs. */
 router.get('/', function(req, res, next) {
-    let readaccesskey = "2E87E63F0552DF38";
-    const icaos = "EDDM-EDDK";
+    // http://localhost:3000/jobs?icaos=EDDM-EDDK&readaccesskey=2E87E63F0552DF38
+    //const readaccesskey = "2E87E63F0552DF38";
+    const readaccesskey = req.query.readaccesskey;
+
+    //const icaos = "EDDM-EDDK-KRYN";
+    const icaos = req.query.icaos;
 
     getJobs(url, readaccesskey, icaos, res, (res, json) => {
         const jobs = json.jobs;
